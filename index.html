@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>QomusiyAPP — Raqamli Kutubxona va Reliz Platformasi</title>
+  <meta name="theme-color" content="#6366f1" />
+  <meta name="description" content="QomusiyAPP — PDF kitoblarni yuklash, qoralama saqlash, reliz qilish va qulay o'qish platformasi." />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-badge">Q</span>
+      <div>
+        <div class="brand-name">QomusiyAPP</div>
+        <div class="brand-sub">Digital Library &amp; Release Hub</div>
+      </div>
+    </div>
+
+    <div class="nav-actions" id="authControls">
+      <button type="button" id="installAppBtn" class="btn-success hidden">Ilovani o‘rnatish</button>
+      <button type="button" id="openLoginBtn">Sign In</button>
+      <button type="button" class="btn-primary" id="openRegisterBtn">Register</button>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="hero">
+      <div class="hero-content">
+        <span class="pill">v1.0 • Nik va Parol Hisob Tizimi</span>
+        <h1>QomusiyAPP — Kutubxona, Yuklash va Reliz</h1>
+        <p>
+          Faqat <strong>Nik</strong> va <strong>Parol</strong> bilan <strong>Register</strong> va <strong>Sign In</strong> qiling,
+          PDF kitoblaringizni yuklang, qoralama (<strong>Draft</strong>) holatida tayyorlang va <strong>Reliz</strong> qiling.
+        </p>
+      </div>
+      <div class="hero-cta">
+        <button type="button" class="btn-primary btn-lg" id="heroUploadBtn">+ Yangi PDF Yuklash</button>
+      </div>
+    </section>
+
+    <!-- Statistika paneli -->
+    <section class="stats-grid" aria-label="Statistika">
+      <div class="stat-card">
+        <span class="stat-label">Jami kitoblar</span>
+        <strong class="stat-value" id="statTotal">0</strong>
+      </div>
+      <div class="stat-card">
+        <span class="stat-label">Reliz qilingan</span>
+        <strong class="stat-value stat-released" id="statReleased">0</strong>
+      </div>
+      <div class="stat-card">
+        <span class="stat-label">Qoralamalar</span>
+        <strong class="stat-value stat-draft" id="statDraft">0</strong>
+      </div>
+    </section>
+
+    <!-- Bo'limlar va Filtr/Qidiruv -->
+    <div class="toolbar">
+      <nav class="tabs" aria-label="Asosiy bo‘limlar">
+        <button type="button" class="tab active" data-tab="library">Kutubxona</button>
+        <button type="button" class="tab" data-tab="upload">PDF Yuklash va Reliz</button>
+        <button type="button" class="tab" data-tab="chat">Chat</button>
+      </nav>
+
+      <div class="filters" id="libraryFilters">
+        <input
+          type="search"
+          id="searchInput"
+          class="search-input"
+          placeholder="Kitob nomi yoki muallif bo‘yicha qidirish..."
+          aria-label="Qidiruv"
+        />
+        <div class="filter-pills" role="group" aria-label="Holat bo‘yicha filtr">
+          <button type="button" class="filter-btn active" data-filter="all">Barchasi</button>
+          <button type="button" class="filter-btn" data-filter="released">Reliz</button>
+          <button type="button" class="filter-btn" data-filter="draft">Qoralama</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Kutubxona bo'limi -->
+    <section id="tab-library">
+      <div class="grid" id="booksGrid"></div>
+    </section>
+
+    <!-- Yuklash va reliz bo'limi -->
+    <section id="tab-upload" class="hidden">
+      <div class="panel">
+        <h2 class="panel-title">Yangi PDF Kitob Qo‘shish</h2>
+        <p class="meta panel-desc">
+          Kitob ma’lumotlarini kiriting va PDF faylni tanlang. Darhol <strong>Reliz</strong> qilishingiz yoki keyinroq qoralamadan nashrga chiqarishingiz mumkin.
+        </p>
+        <form id="uploadForm">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="bookTitle">Kitob nomi</label>
+              <input type="text" id="bookTitle" placeholder="Masalan: Jahon tarixi" required />
+            </div>
+            <div class="form-group">
+              <label for="bookAuthor">Muallif</label>
+              <input type="text" id="bookAuthor" placeholder="Muallif ismi" required />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="bookVersion">Versiya / Reliz</label>
+              <input type="text" id="bookVersion" value="v1.0" placeholder="Masalan: v1.0" />
+            </div>
+            <div class="form-group">
+              <label for="bookStatus">Holati</label>
+              <select id="bookStatus">
+                <option value="draft">Qoralama (Draft)</option>
+                <option value="released">Reliz qilingan (Published)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="pdfFile">PDF fayl tanlang (maksimal 50 MB tavsiya etiladi)</label>
+            <input type="file" id="pdfFile" accept="application/pdf" required />
+          </div>
+
+          <button type="submit" class="btn-primary" id="uploadSubmitBtn">Saqlash va Yuklash</button>
+        </form>
+      </div>
+    </section>
+
+    <!-- Umumiy Chat bo'limi -->
+    <section id="tab-chat" class="hidden">
+      <div class="panel chat-panel">
+        <div class="chat-header-row">
+          <div>
+            <h2 class="panel-title">Umumiy Chat</h2>
+            <p class="meta">Kitoblar va relizlar bo‘yicha foydalanuvchilar bilan yozishing</p>
+          </div>
+          <button type="button" id="refreshChatBtn">Yangilash</button>
+        </div>
+
+        <div class="chat-messages" id="chatMessages">
+          <p class="meta">Xabarlar yuklanmoqda...</p>
+        </div>
+
+        <form id="chatForm" class="chat-form" autocomplete="off">
+          <input
+            type="text"
+            id="chatInput"
+            placeholder="Xabar yozing..."
+            maxlength="500"
+            required
+          />
+          <button type="submit" class="btn-primary" id="chatSendBtn">Yuborish</button>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <!-- PDF O'quvchi Modal -->
+  <div class="modal" id="readerModal" role="dialog" aria-modal="true" aria-labelledby="readerTitle">
+    <div class="modal-box">
+      <div class="modal-header">
+        <div class="reader-heading">
+          <strong id="readerTitle">Kitob nomi</strong>
+          <span class="meta reader-meta" id="readerMeta"></span>
+        </div>
+        <div class="modal-actions">
+          <a id="downloadPdfLink" class="btn-link" href="#" target="_blank" rel="noopener noreferrer">Yangi oynada ochish</a>
+          <button type="button" class="btn-danger" id="closeReaderBtn">Yopish</button>
+        </div>
+      </div>
+      <div class="modal-body">
+        <iframe id="pdfFrame" title="PDF Reader"></iframe>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sign In / Register Modal: Faqat Nik va Parol -->
+  <div class="modal" id="authModal" role="dialog" aria-modal="true" aria-labelledby="authTitle">
+    <div class="modal-box auth-box">
+      <div class="modal-header auth-header">
+        <strong id="authTitle">Sign In</strong>
+        <button type="button" id="closeAuthBtn" aria-label="Yopish">✕</button>
+      </div>
+      <form id="authForm" autocomplete="off">
+        <div class="form-group">
+          <label for="authNick">Nik</label>
+          <input
+            type="text"
+            id="authNick"
+            placeholder="Nikingizni kiriting"
+            minlength="3"
+            maxlength="24"
+            pattern="[A-Za-z0-9_.-]{3,24}"
+            required
+          />
+        </div>
+        <div class="form-group">
+          <label for="authPassword">Parol</label>
+          <input
+            type="password"
+            id="authPassword"
+            placeholder="Kamida 4 belgi"
+            minlength="4"
+            maxlength="64"
+            required
+          />
+        </div>
+        <button type="submit" class="btn-primary full-width" id="authSubmitBtn">Kirish</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="app.js"></script>
+  <script>
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker
+          .register("./service-worker.js")
+          .catch((err) => console.error("Service Worker xatosi:", err));
+      });
+    }
+  </script>
+</body>
+</html>
